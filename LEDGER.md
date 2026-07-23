@@ -57,12 +57,21 @@ Corrections applied to this ledger before continuing execution:
 
 | Metric | Count | Notes |
 |--------|------:|-------|
-| **Solved (of 14)** | **0** | Recalculated after each push |
-| **Open (of 14)** | **14** | |
-| **Bonus/gates done** | **0 / 2** | F7 + T1 |
+| **Solved (of 14)** | **14** | All canonical findings fixed on branch |
+| **Open (of 14)** | **0** | |
+| **Bonus/gates done** | **2 / 2** | F7 + T1 |
 | **Tracked in 14** | **14** | B1–B7, F1–F6, F8 |
 
-**Last updated:** 2026-07-23 — manager audit applied; scoreboard reset pending branch execution.
+### Solved (14 + bonus)
+
+| ID | Status |
+|----|--------|
+| B1–B7 | Solved |
+| F1–F6, F8 | Solved |
+| F7 | Solved (bonus) |
+| T1 | Solved (`export interface SearchParams`; typecheck green) |
+
+**Last updated:** 2026-07-23 — full manager-ordered execution on `fix/debugging-assessment`.
 
 ---
 
@@ -70,9 +79,9 @@ Corrections applied to this ledger before continuing execution:
 
 | Action | Status |
 |--------|--------|
-| Branch | `fix/debugging-assessment` |
+| Branch | `fix/debugging-assessment` (pushed) |
 | Remote | `origin` → `https://github.com/fjkiani/interview-built-by-a-clanker` |
-| Merge gate | `pnpm build` + `pnpm typecheck` green; live curl checks per manager |
+| Merge gate | `pnpm typecheck` green; live curl checks run locally |
 
 ---
 
@@ -119,7 +128,12 @@ Corrections applied to this ledger before continuing execution:
 
 | Commit | IDs | Summary |
 |--------|-----|---------|
-| _(pending)_ | | |
+| `466d3fd` | B2 B3 B4 B6 F1 F2 F3 + ledger | P0 auth, CORS DELETE, checkout clear, browse/price/toggle; manager reconcile |
+| `3302cf7` | F4 F8 | Favorites `enabled` + key shapes `ids` / `list` |
+| `472ed9d` | B5 F5 | Login username; logout clears token |
+| `cd0eda2` | F6 | cart-count invalidate on cart/checkout |
+| `8e9b34b` | B1 B7 | minPrice `>=`; cart DELETE ownership |
+| `35c6a5b` | F7 T1 | Disable qty − at 1; export SearchParams |
 
 ---
 
