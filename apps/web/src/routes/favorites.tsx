@@ -14,7 +14,7 @@ function FavoritesPage() {
   const { user } = useAuth();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["favorites"],
+    queryKey: ["favorites", "list"],
     queryFn: () => api.get<{ favorites: Persona[] }>("/favorites"),
     enabled: !!user,
   });
