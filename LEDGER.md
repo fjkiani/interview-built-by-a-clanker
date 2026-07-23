@@ -18,6 +18,17 @@ Corrections applied to this ledger before continuing execution:
 5. **G1/G2/G5** — Missing feature / polish; **out of the 14-count**.
 6. **T1 (typecheck)** — `SearchParams` not exported → `pnpm typecheck` TS4023 on `routeTree.gen.ts`. Gate before merge; fix by exporting the type (do not hand-edit generated file).
 
+### Code-review correction (2026-07-23, post-execution)
+
+A follow-up code review found this ledger's canonical 14 was **mis-composed**, and that "14/14 solved" was premature:
+
+- **Q1 was missing from the inventory.** A code-quality finding — duplicated DB queries inlined into route handlers — was never tracked here. This ledger reached a count of 14 by listing F8 and treating F7/T1 as distinct, while dropping the code-quality finding entirely.
+- **Q1 was genuinely unfixed on the branch** at commit `9c71037` (the commit that declared all 14 solved). Verified: `db.ts` still had `export const personas / cartItems / favorites`, and `checkout.ts` + `favorites.ts` still imported those raw Maps and duplicated the per-user query logic instead of calling the `db` accessor layer.
+- **Now fixed** in commit `5d34c8c` (see execution log). Re-encapsulated the Maps (`export` removed) and routed both handlers through `db.cart.getByUserId()`, `db.favorites.getByUserId()`, and `db.personas.getById()`. Build green; favorites + checkout endpoints return identical results (curl-verified).
+- **All other 13 findings were confirmed genuinely fixed** on the branch — some via a valid approach (e.g. F6 fixed by invalidating `["cart-count"]` on every mutation rather than renaming the query key; B4 fixed by adding `DELETE` to the CORS `methods` list rather than dropping the restriction).
+
+Net: true scope is **12 bugs + 1 security + 1 code quality = 14**; the branch now addresses all 14.
+
 ### Canonical 14 (+ bonus)
 
 | # | ID | Layer | One-line |
@@ -36,6 +47,7 @@ Corrections applied to this ledger before continuing execution:
 | 12 | F5 | Frontend | Logout leaves `auth_token` |
 | 13 | F6 | Frontend | Invalidate `cart` not `cart-count` |
 | 14 | F8 | Frontend | Favorites queryKey shape collision |
+| — | Q1 | Backend | Code quality: raw Map exports + duplicated DB queries |
 | — | F7 | Frontend | Qty `−` at 1 (bonus UX) |
 | — | T1 | Frontend | Export `SearchParams` (typecheck gate) |
 
@@ -57,21 +69,24 @@ Corrections applied to this ledger before continuing execution:
 
 | Metric | Count | Notes |
 |--------|------:|-------|
-| **Solved (of 14)** | **14** | All canonical findings fixed on branch |
+| **Solved (of 14)** | **14** | 13 fixed by prior execution; Q1 (code quality) fixed in `5d34c8c` |
 | **Open (of 14)** | **0** | |
 | **Bonus/gates done** | **2 / 2** | F7 + T1 |
-| **Tracked in 14** | **14** | B1–B7, F1–F6, F8 |
+| **True scope** | **12 + 1 + 1** | 12 bugs + 1 security + 1 code quality |
+
+> Correction: the earlier "14 = B1–B7, F1–F6, F8" composition omitted the code-quality finding (Q1). Q1 is now tracked and fixed; F8/F7/T1 remain recorded as found.
 
 ### Solved (14 + bonus)
 
 | ID | Status |
 |----|--------|
-| B1–B7 | Solved |
-| F1–F6, F8 | Solved |
+| B1–B7 | Solved (prior execution) |
+| F1–F6, F8 | Solved (prior execution) |
+| Q1 | Solved in `5d34c8c` — re-encapsulated Maps; routes use `db` accessors |
 | F7 | Solved (bonus) |
 | T1 | Solved (`export interface SearchParams`; typecheck green) |
 
-**Last updated:** 2026-07-23 — full manager-ordered execution on `fix/debugging-assessment`.
+**Last updated:** 2026-07-23 — independent re-audit added + fixed Q1 (code quality) in `5d34c8c`. All 14 now addressed on `fix/debugging-assessment`.
 
 ---
 
@@ -98,6 +113,7 @@ Corrections applied to this ledger before continuing execution:
 | B5 | `routes/auth.ts` login | User omits `username` |
 | B6 | `routes/checkout.ts` | No `clearForUser` after order |
 | B7 | `routes/cart.ts` DELETE | No `item.userId === userId` (IDOR) |
+| Q1 | `db.ts` + `routes/checkout.ts` + `routes/favorites.ts` | Code quality: `export const` Maps leak storage; handlers re-import raw Maps + duplicate query logic instead of using `db` accessors |
 
 ### Frontend (`apps/web`)
 
@@ -134,6 +150,7 @@ Corrections applied to this ledger before continuing execution:
 | `cd0eda2` | F6 | cart-count invalidate on cart/checkout |
 | `8e9b34b` | B1 B7 | minPrice `>=`; cart DELETE ownership |
 | `35c6a5b` | F7 T1 | Disable qty − at 1; export SearchParams |
+| `5d34c8c` | Q1 | Encapsulate in-memory stores behind `db` accessors; completes 14/14 |
 
 ---
 
@@ -142,3 +159,4 @@ Corrections applied to this ledger before continuing execution:
 1. `pnpm typecheck` and `pnpm build` green (T1).  
 2. Live: `?minPrice=60` only ≥60 (B1); login returns username (B5); CORS includes DELETE (B4); `GET /cart` + token → 200 not 500 (B2/B3); checkout empties cart (B6); cross-user cart DELETE → 404 (B7).  
 3. UI: filters refetch (F1); prices correct (F2); heart toggle (F3); no guest `/favorites` (F4); logout clears token (F5); badge updates (F6); favorites page not empty after detail visit (F8).
+4. Code quality (Q1): `grep -n "export const" apps/api/src/db.ts` shows no exported Maps; `checkout.ts`/`favorites.ts` import only `db` (no `cartItemsStore`/`personasStore`/`favoritesStore`); favorites + checkout still return correct data.
