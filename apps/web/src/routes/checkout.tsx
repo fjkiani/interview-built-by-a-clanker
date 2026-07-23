@@ -28,6 +28,7 @@ function CheckoutPage() {
     onSuccess: (data) => {
       setOrder(data);
       queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: ["cart-count"] });
     },
   });
 

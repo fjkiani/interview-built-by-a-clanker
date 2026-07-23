@@ -25,6 +25,7 @@ function CartPage() {
       api.put<Cart>(`/cart/${itemId}`, { quantity }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: ["cart-count"] });
     },
   });
 
@@ -32,6 +33,7 @@ function CartPage() {
     mutationFn: (itemId: string) => api.delete<Cart>(`/cart/${itemId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: ["cart-count"] });
     },
   });
 
