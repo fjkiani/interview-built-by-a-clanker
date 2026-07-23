@@ -34,12 +34,13 @@ function PersonaDetailPage() {
       api.post<Cart>("/cart", { personaId, quantity: 1 }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: ["cart-count"] });
     },
   });
 
   const toggleFavorite = useMutation({
     mutationFn: () =>
-      !isFavorited
+      isFavorited
         ? api.delete(`/favorites/${personaId}`)
         : api.post("/favorites", { personaId }),
     onSuccess: () => {
