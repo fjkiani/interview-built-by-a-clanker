@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import type { Persona } from "@acme/shared";
-import { db, favorites as favoritesStore, personas as personasStore } from "../db.js";
+import { db } from "../db.js";
 import { authenticate } from "../middleware/auth.js";
 
 export async function favoriteRoutes(app: FastifyInstance) {
@@ -8,17 +8,15 @@ export async function favoriteRoutes(app: FastifyInstance) {
 
   app.get("/favorites", async (request) => {
     const { id: userId } = request.user as { id: string };
-    const userFavs = favoritesStore.get(userId);
-    const result: Persona[] = [];
+    const personaIds = db.favorites.getByUserId(userId);
+    const personas: Persona[] = [];
 
-    if (userFavs) {
-      for (const pid of userFavs) {
-        const persona = personasStore.get(pid);
-        if (persona) result.push(persona);
-      }
+    for (const pid of personaIds) {
+      const persona = db.personas.getById(pid);
+      if (persona) personas.push(persona);
     }
 
-    return { favorites: result };
+    return { favorites: personas };
   });
 
   app.post("/favorites", async (request, reply) => {

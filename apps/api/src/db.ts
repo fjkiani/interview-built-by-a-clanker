@@ -11,10 +11,10 @@ interface CartEntry {
   quantity: number;
 }
 
-export const personas = new Map<string, Persona>();
+const personas = new Map<string, Persona>();
 const users = new Map<string, StoredUser>();
-export const cartItems = new Map<string, CartEntry>();
-export const favorites = new Map<string, Set<string>>(); // userId -> Set<personaId>
+const cartItems = new Map<string, CartEntry>();
+const favorites = new Map<string, Set<string>>(); // userId -> Set<personaId>
 const orders = new Map<string, Order>();
 
 let cartItemCounter = 0;
